@@ -26,5 +26,5 @@ jobs:
         name: Windows_${{ matrix.build_type }}_${{ matrix.arch }}
         path: |
           ${{ github.workspace }}\bin\HadesSavesExtractor.exe
-          ${{ github.workspace }}\sctipts\extract.bat
-          ${{ github.workspace }}\sctipts\import.bat
+          ${{ github.workspace }}\scripts\extract.bat
+          ${{ github.workspace }}\scripts\import.bat
