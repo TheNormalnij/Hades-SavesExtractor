@@ -26,7 +26,7 @@ class SGGBinaryWritter {
         if (!write(strlLen))
             return false;
 
-        write(static_cast<void *>(str.data()), strlLen);
+        return write(static_cast<void *>(str.data()), strlLen);
     }
 
     template <typename T, typename = std::enable_if<std::is_convertible<T, uint32_t>::value>>
@@ -43,6 +43,8 @@ class SGGBinaryWritter {
             if (!write(v))
                 return false;
         }
+
+        return true;
     }
 
   private:
