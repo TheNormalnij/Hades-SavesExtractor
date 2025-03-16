@@ -9,8 +9,8 @@ The tool wasn't fully tested, so use it at your own risk. Always make a backup o
 ## Winows x64 with MSVC
 
 ```shell
-	cmake -A x64 . -B build_msvc
-	cmake --build build_msvc --config Release
+cmake -A x64 . -B build_msvc
+cmake --build build_msvc --config Release
 ```
 
 # Usage
@@ -27,11 +27,11 @@ The tool wasn't fully tested, so use it at your own risk. Always make a backup o
 ## Using command line
 
 ```shell
-	HadesSavesExtractor.exe --extract <path to the .sav file> --out <path to the output .lua file>
+HadesSavesExtractor.exe --extract <path to the .sav file> --out <path to the output .lua file>
 ```
 
 ```shell
-	HadesSavesExtractor.exe --import <path to the input .lua file> --out <path to the output .sav file>
+HadesSavesExtractor.exe --import <path to the input .lua file> --out <path to the output .sav file>
 ```
 
 ### Example:
