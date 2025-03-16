@@ -66,7 +66,7 @@ static void extract(const std::string &inputFile, const std::string &outputFile)
 
     outFile << "LUA_DATA = {" << std::endl;
 
-    save_table(L, outFile, 1, 1);
+    serialize_table(L, outFile, 1, 1);
 
     outFile << "}" << std::endl;
 
@@ -116,11 +116,11 @@ static void import(const std::string& inputFile, const std::string& outputFile) 
     lua_pop(L, 1);
 
     lua_getglobal(L, "EASY_MODE");
-    data.easyMode = lua_toboolean(L, -1) == true ? 1 : 0;
+    data.easyMode = lua_toboolean(L, -1);
     lua_pop(L, 1);
 
     lua_getglobal(L, "HARD_MODE");
-    data.hardMode = lua_toboolean(L, -1) == true ? 1 : 0;
+    data.hardMode = lua_toboolean(L, -1);
     lua_pop(L, 1);
 
     lua_getglobal(L, "MAP_NAME");

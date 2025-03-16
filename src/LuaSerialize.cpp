@@ -5,7 +5,7 @@
 
 #include "LuaSerialize.h"
 
-bool save_table(lua_State *L, std::ofstream &outFile, int index, int nesting) {
+bool serialize_table(lua_State *L, std::ofstream &outFile, int index, int nesting) {
     int result = true;
 
     lua_checkstack(L, 2);
@@ -29,7 +29,7 @@ bool save_table(lua_State *L, std::ofstream &outFile, int index, int nesting) {
         }
 
         if (result) {
-            result = save_value(L, outFile, value_pos, nesting);
+            result = serialize_value(L, outFile, value_pos, nesting);
         }
 
         if (result) {
@@ -40,7 +40,7 @@ bool save_table(lua_State *L, std::ofstream &outFile, int index, int nesting) {
     return result;
 }
 
-static int save_value(lua_State *L, std::ofstream &outFile, int index, int nesting) {
+static int serialize_value(lua_State *L, std::ofstream &outFile, int index, int nesting) {
     bool result = true;
 
     switch (lua_type(L, index)) {
@@ -62,7 +62,7 @@ static int save_value(lua_State *L, std::ofstream &outFile, int index, int nesti
 
     case LUA_TTABLE:
         outFile << "{" << std::endl;
-        result = save_table(L, outFile, index, nesting + 1);
+        result = serialize_table(L, outFile, index, nesting + 1);
 
         for (int i = 0; i < nesting; i++) {
             outFile << "    ";

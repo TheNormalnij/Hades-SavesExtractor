@@ -12,5 +12,5 @@ extern "C" {
 #include <luabins.h>
 }
 
-int save_value(lua_State *L, std::ofstream &outFile, int index, int nesting);
-bool save_table(lua_State *L, std::ofstream &outFile, int index, int nesting);
+int serialize_value(lua_State *L, std::ofstream &outFile, int index, int nesting);
+bool serialize_table(lua_State *L, std::ofstream &outFile, int index, int nesting);
