@@ -6,8 +6,9 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 
 namespace Adler32 {
-    uint32_t Calculate(const uint8_t *input, size_t length);
+uint32_t Calculate(const uint8_t *input, size_t length);
 }
