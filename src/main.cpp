@@ -66,7 +66,7 @@ static void extract(const std::string &inputFile, const std::string &outputFile)
 
     outFile << "LUA_DATA = {" << std::endl;
 
-    serialize_table(L, outFile, 1, 1);
+    LuaSerialize::serialize_table(L, outFile, 1, 1);
 
     outFile << "}" << std::endl;
 

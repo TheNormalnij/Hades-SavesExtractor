@@ -5,7 +5,7 @@
 
 #include "LuaSerialize.h"
 
-bool serialize_table(lua_State *L, std::ofstream &outFile, int index, int nesting) {
+bool LuaSerialize::serialize_table(lua_State *L, std::ofstream &outFile, int index, int nesting) {
     int result = true;
 
     lua_checkstack(L, 2);
@@ -40,7 +40,7 @@ bool serialize_table(lua_State *L, std::ofstream &outFile, int index, int nestin
     return result;
 }
 
-static int serialize_value(lua_State *L, std::ofstream &outFile, int index, int nesting) {
+int LuaSerialize::serialize_value(lua_State *L, std::ofstream &outFile, int index, int nesting) {
     bool result = true;
 
     switch (lua_type(L, index)) {

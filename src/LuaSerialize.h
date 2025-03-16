@@ -12,5 +12,9 @@ extern "C" {
 #include <luabins.h>
 }
 
+namespace LuaSerialize {
+
 int serialize_value(lua_State *L, std::ofstream &outFile, int index, int nesting);
 bool serialize_table(lua_State *L, std::ofstream &outFile, int index, int nesting);
+
+} // namespace LuaSerialize
