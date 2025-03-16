@@ -28,3 +28,26 @@ jobs:
           ${{ github.workspace }}\bin\HadesSavesExtractor.exe
           ${{ github.workspace }}\scripts\extract.bat
           ${{ github.workspace }}\scripts\import.bat
+  linux:
+    name: Build for Linux
+    runs-on: ubuntu-latest
+    strategy:
+        matrix:
+            build_type: ["Release", "Debug"]
+            arch: ["x86", "x64"]
+    steps:
+    - uses: actions/checkout@v4
+    - name: download x86 libs
+      if: ${{ matrix.arch == 'x86' }}
+      run: sudo apt install gcc-multilib g++-multilib
+    - name: Compile for Linux
+      run: |
+        cmake . -B build ${{ matrix.arch == 'x86' && '-DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32' || '' }} -D CMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        cmake --build build --config ${{ matrix.build_type }}
+      shell: bash
+    - name: Store artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Linux_${{ matrix.build_type }}_${{ matrix.arch }}
+        path: |
+          ${{ github.workspace }}\bin\HadesSavesExtractor
