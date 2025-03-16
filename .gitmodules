@@ -1,0 +1,6 @@
+[submodule "luabins"]
+	path = libs/luabins/submodule
+	url = git@github.com:agladysh/luabins.git
+[submodule "libs/lz4"]
+	path = libs/lz4
+	url = https://github.com/lz4/lz4.git
