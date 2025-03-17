@@ -8,6 +8,18 @@
 #include <fstream>
 #include <iostream>
 
+#define SAFE_PARSER_READ(reader, value)                                                                                \
+    if (!reader.read(value)) {                                                                                         \
+        std::cerr << "Cannot read " #value << std::endl;                                                               \
+        return false;                                                                                                  \
+    }
+
+#define SAFE_PARSER_WRITE(writter, value)                                                                              \
+    if (!writter.write(value)) {                                                                                       \
+        std::cerr << "Cannot write " #value << std::endl;                                                              \
+        return false;                                                                                                  \
+    }
+
 constexpr size_t SAVE_BUFFER_SIZE = 3129344 * 2;
 
 bool HadesSaveData::read(const std::vector<uint8_t> &buffer) {
@@ -81,3 +93,6 @@ bool HadesSaveData::write(std::vector<uint8_t> &binary) {
 
     return true;
 }
+
+#undef SAFE_PARSER_READ
+#undef SAFE_PARSER_WRITE

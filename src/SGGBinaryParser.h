@@ -10,12 +10,6 @@
 #include <string>
 #include <vector>
 
-#define SAFE_PARSER_READ(reader, value)                                                                                \
-    if (!reader.read(value)) {                                                                                         \
-        std::cerr << "Cannot read " #value << std::endl;                                                               \
-        return false;                                                                                                  \
-    }
-
 class SGGBinaryParser {
   public:
     SGGBinaryParser(const std::vector<uint8_t> *binary) : m_binary(binary), m_pos{0}, m_maxPos{binary->size()} {};
