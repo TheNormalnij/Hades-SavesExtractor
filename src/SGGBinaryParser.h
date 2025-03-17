@@ -5,16 +5,15 @@
 
 #pragma once
 
+#include <cstring>
 #include <string>
 #include <vector>
-#include <cstring>
 
-#define SAFE_PARSER_READ(value)                                                                                        \
-    if (!parser.read(value)) {                                                                                         \
+#define SAFE_PARSER_READ(reader, value)                                                                                \
+    if (!reader.read(value)) {                                                                                         \
         std::cerr << "Cannot read " #value << std::endl;                                                               \
         return false;                                                                                                  \
     }
-
 
 class SGGBinaryParser {
   public:

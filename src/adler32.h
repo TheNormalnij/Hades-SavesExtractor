@@ -3,7 +3,6 @@
 /// \file adler32.h
 /// \brief Class file for ADLER-32 checksum calculations
 
-
 #pragma once
 
 #include <cstddef>

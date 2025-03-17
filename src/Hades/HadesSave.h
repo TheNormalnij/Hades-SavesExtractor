@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-#include <lz4.h>
 #include "../SGGBinaryParser.h"
 #include "../SGGBinaryWritter.h"
+#include <lz4.h>
+#include <string>
+#include <vector>
 
 constexpr size_t SAVE_BUFFER_SIZE = 3129344 * 2;
 
@@ -18,7 +18,7 @@ class HadesSaveData {
     bool read(const std::vector<uint8_t> &buffer);
     bool write(std::vector<uint8_t> &binary);
 
-    uint32_t magic;       // SGB1
+    uint32_t magic;
     uint32_t checksum;
     uint32_t gameVersion;
     uint64_t timestamp;

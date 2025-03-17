@@ -4,28 +4,28 @@
 //
 
 #include "HadesSave.h"
+#include "../adler32.h"
 #include <fstream>
 #include <iostream>
-#include "../adler32.h"
 
 bool HadesSaveData::read(const std::vector<uint8_t> &buffer) {
     SGGBinaryParser parser{&buffer};
-    SAFE_PARSER_READ(magic)
-    SAFE_PARSER_READ(checksum)
-    SAFE_PARSER_READ(gameVersion)
-    SAFE_PARSER_READ(timestamp)
-    SAFE_PARSER_READ(location)
-    SAFE_PARSER_READ(complectedRuns)
-    SAFE_PARSER_READ(accumulatedMetaPoints)
-    SAFE_PARSER_READ(activeShrinePoints)
-    SAFE_PARSER_READ(easyMode)
-    SAFE_PARSER_READ(hardMode)
-    SAFE_PARSER_READ(notableLuaData)
-    SAFE_PARSER_READ(mapName)
-    SAFE_PARSER_READ(mapName2)
+    SAFE_PARSER_READ(parser, magic)
+    SAFE_PARSER_READ(parser, checksum)
+    SAFE_PARSER_READ(parser, gameVersion)
+    SAFE_PARSER_READ(parser, timestamp)
+    SAFE_PARSER_READ(parser, location)
+    SAFE_PARSER_READ(parser, complectedRuns)
+    SAFE_PARSER_READ(parser, accumulatedMetaPoints)
+    SAFE_PARSER_READ(parser, activeShrinePoints)
+    SAFE_PARSER_READ(parser, easyMode)
+    SAFE_PARSER_READ(parser, hardMode)
+    SAFE_PARSER_READ(parser, notableLuaData)
+    SAFE_PARSER_READ(parser, mapName)
+    SAFE_PARSER_READ(parser, mapName2)
 
     std::string luaBindDataCompressed;
-    SAFE_PARSER_READ(luaBindDataCompressed)
+    SAFE_PARSER_READ(parser, luaBindDataCompressed)
 
     luaBindData.resize(SAVE_BUFFER_SIZE);
 
@@ -42,19 +42,19 @@ bool HadesSaveData::read(const std::vector<uint8_t> &buffer) {
 
 bool HadesSaveData::write(std::vector<uint8_t> &binary) {
     SGGBinaryWritter writter{&binary};
-    SAFE_PARSER_WRITE(magic)
-    SAFE_PARSER_WRITE(checksum)
-    SAFE_PARSER_WRITE(gameVersion)
-    SAFE_PARSER_WRITE(timestamp)
-    SAFE_PARSER_WRITE(location)
-    SAFE_PARSER_WRITE(complectedRuns)
-    SAFE_PARSER_WRITE(accumulatedMetaPoints)
-    SAFE_PARSER_WRITE(activeShrinePoints)
-    SAFE_PARSER_WRITE(easyMode)
-    SAFE_PARSER_WRITE(hardMode)
-    SAFE_PARSER_WRITE(notableLuaData)
-    SAFE_PARSER_WRITE(mapName)
-    SAFE_PARSER_WRITE(mapName2)
+    SAFE_PARSER_WRITE(writter, magic)
+    SAFE_PARSER_WRITE(writter, checksum)
+    SAFE_PARSER_WRITE(writter, gameVersion)
+    SAFE_PARSER_WRITE(writter, timestamp)
+    SAFE_PARSER_WRITE(writter, location)
+    SAFE_PARSER_WRITE(writter, complectedRuns)
+    SAFE_PARSER_WRITE(writter, accumulatedMetaPoints)
+    SAFE_PARSER_WRITE(writter, activeShrinePoints)
+    SAFE_PARSER_WRITE(writter, easyMode)
+    SAFE_PARSER_WRITE(writter, hardMode)
+    SAFE_PARSER_WRITE(writter, notableLuaData)
+    SAFE_PARSER_WRITE(writter, mapName)
+    SAFE_PARSER_WRITE(writter, mapName2)
 
     std::string luaBindDataCompressed;
     luaBindDataCompressed.resize(LZ4_COMPRESSBOUND(luaBindData.size()));
@@ -66,7 +66,7 @@ bool HadesSaveData::write(std::vector<uint8_t> &binary) {
 
     luaBindDataCompressed.resize(realSize);
 
-    SAFE_PARSER_WRITE(luaBindDataCompressed)
+    SAFE_PARSER_WRITE(writter, luaBindDataCompressed)
 
     uint32_t hash = Adler32::Calculate(binary.data() + 8, binary.size() - 8);
     *reinterpret_cast<uint32_t *>(&binary.at(4)) = hash;

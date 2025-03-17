@@ -43,6 +43,8 @@ add_executable(HadesSavesExtractor
     src/Hades/HadesSaveConverter.h
     src/Hades/HadesSaveConverter.cpp
     src/GameVersions.h
+    src/LuaFileWriteHelper.h
+    src/LuaReadHelper.h
 )
 
 target_link_libraries(HadesSavesExtractor PRIVATE luabins liblua lz4)

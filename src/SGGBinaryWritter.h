@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#define SAFE_PARSER_WRITE(value)                                                                                       \
+#define SAFE_PARSER_WRITE(writter, value)                                                                              \
     if (!writter.write(value)) {                                                                                       \
         std::cerr << "Cannot write " #value << std::endl;                                                              \
         return false;                                                                                                  \
@@ -35,8 +35,7 @@ class SGGBinaryWritter {
         return write(static_cast<void *>(str.data()), strlLen);
     }
 
-    template <typename T, typename = std::enable_if<std::is_convertible<T, uint32_t>::value>>
-    bool write(T &v) {
+    template <typename T, typename = std::enable_if<std::is_convertible<T, uint32_t>::value>> bool write(T &v) {
         return write(static_cast<void *>(&v), sizeof(T));
     }
 
@@ -54,5 +53,5 @@ class SGGBinaryWritter {
     }
 
   private:
-    std::vector<uint8_t>* m_binary;
+    std::vector<uint8_t> *m_binary;
 };

@@ -10,5 +10,5 @@
 
 namespace HadesSaveConverter {
 bool ToLua(std::vector<uint8_t> &buffer, std::ofstream &outputFile);
-bool FromLua(lua_State* luaState,std::ofstream &outputFile);
-}
+bool FromLua(lua_State *luaState, std::ofstream &outputFile);
+} // namespace HadesSaveConverter

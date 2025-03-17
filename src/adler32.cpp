@@ -47,7 +47,6 @@ uint32_t Adler32::Calculate(const uint8_t *input, size_t length) {
             s2 %= BASE;
     }
 
-
     auto m_s1 = (uint16_t)s1;
     auto m_s2 = (uint16_t)s2;
 

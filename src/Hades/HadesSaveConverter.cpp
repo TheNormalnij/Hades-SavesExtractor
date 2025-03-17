@@ -4,10 +4,13 @@
 //
 
 #include "HadesSaveConverter.h"
-#include "../LuaSerialize.h"
-#include <fstream>
+
 #include <iostream>
 #include <saveload.h>
+
+#include "../LuaFileWriteHelper.h"
+#include "../LuaReadHelper.h"
+#include "../LuaSerialize.h"
 
 bool HadesSaveConverter::ToLua(std::vector<uint8_t> &buffer, std::ofstream &outFile) {
     HadesSaveData save{};
@@ -17,143 +20,44 @@ bool HadesSaveConverter::ToLua(std::vector<uint8_t> &buffer, std::ofstream &outF
         return false;
     }
 
-    lua_State *L = luaL_newstate();
+    LuaFileWriteHelper::writeGlobal(outFile, "MAGIC", save.magic);
+    LuaFileWriteHelper::writeGlobal(outFile, "CHECKSUM", save.checksum);
+    LuaFileWriteHelper::writeGlobal(outFile, "GAME_VERSION", save.gameVersion);
+    LuaFileWriteHelper::writeGlobal(outFile, "TIMESTAMP", save.timestamp);
+    LuaFileWriteHelper::writeGlobal(outFile, "LOCATION", save.location);
+    LuaFileWriteHelper::writeGlobal(outFile, "COMPLETED_RUNS", save.complectedRuns);
+    LuaFileWriteHelper::writeGlobal(outFile, "ACCUMULATED_META_POINTS", save.accumulatedMetaPoints);
+    LuaFileWriteHelper::writeGlobal(outFile, "ACTIVE_SHRINE_POINTS", save.activeShrinePoints);
+    LuaFileWriteHelper::writeGlobal(outFile, "EASY_MODE", static_cast<bool>(save.easyMode));
+    LuaFileWriteHelper::writeGlobal(outFile, "HARD_MODE", static_cast<bool>(save.hardMode));
+    LuaFileWriteHelper::writeGlobal(outFile, "MAP_NAME", save.mapName);
+    LuaFileWriteHelper::writeGlobal(outFile, "MAP_NAME2", save.mapName2);
+    LuaFileWriteHelper::writeGlobal(outFile, "NOTABLE_LUA_DATA", save.notableLuaData);
+    LuaFileWriteHelper::writeGlobalLuaBind(outFile, "LUA_DATA", save.luaBindData);
 
-    if (!L) {
-        std::cerr << "Failed to create Lua state." << std::endl;
-        return false;
-    }
-
-    int count;
-    if (luabins_load(L, reinterpret_cast<const uint8_t *>(save.luaBindData.c_str()), save.luaBindData.size(), &count) !=
-        LUABINS_ESUCCESS) {
-        std::cerr << "Failed to deserialise." << std::endl;
-        lua_close(L);
-        return false;
-    }
-
-    int top = lua_gettop(L);
-
-    if (!lua_istable(L, 1)) {
-        std::cerr << "Sealized value is not a table." << std::endl;
-        lua_close(L);
-        return false;
-    }
-
-    outFile << "MAGIC = " << save.magic << std::endl;
-    outFile << "CHECKSUM = " << save.checksum << std::endl;
-    outFile << "GAME_VERSION = " << save.gameVersion << std::endl;
-    outFile << "TIMESTAMP = " << save.timestamp << std::endl;
-    outFile << "LOCATION = \"" << save.location << "\"" << std::endl;
-    outFile << "COMPLETED_RUNS = " << save.complectedRuns << std::endl;
-    outFile << "ACCUMULATED_META_POINTS = " << save.accumulatedMetaPoints << std::endl;
-    outFile << "ACTIVE_SHRINE_POINTS = " << save.activeShrinePoints << std::endl;
-    outFile << "EASY_MODE = " << (save.easyMode ? "true" : "false") << std::endl;
-    outFile << "HARD_MODE = " << (save.hardMode ? "true" : "false") << std::endl;
-    outFile << "MAP_NAME = \"" << save.mapName << "\"" << std::endl;
-    outFile << "MAP_NAME2 = \"" << save.mapName2 << "\"" << std::endl;
-
-    outFile << "NOTABLE_LUA_DATA = {" << std::endl;
-    for (const auto &str : save.notableLuaData) {
-        outFile << "    \"" << str << "\"," << std::endl;
-    }
-    outFile << "}" << std::endl;
-
-    outFile << "LUA_DATA = {" << std::endl;
-
-    LuaSerialize::serialize_table(L, outFile, 1, 1);
-
-    outFile << "}" << std::endl;
-
-    lua_close(L);
     return true;
 }
 
 bool HadesSaveConverter::FromLua(lua_State *L, std::ofstream &outputFile) {
-    HadesSaveData data;
+    HadesSaveData save;
 
-    lua_getglobal(L, "MAGIC");
-    data.magic = lua_tonumber(L, -1);
-    lua_pop(L, 1);
+    LuaReadHelper::readGlobal(L, "MAGIC", save.magic);
+    LuaReadHelper::readGlobal(L, "CHECKSUM", save.checksum);
+    LuaReadHelper::readGlobal(L, "GAME_VERSION", save.gameVersion);
+    LuaReadHelper::readGlobal(L, "TIMESTAMP", save.timestamp);
+    LuaReadHelper::readGlobal(L, "LOCATION", save.location);
+    LuaReadHelper::readGlobal(L, "COMPLETED_RUNS", save.complectedRuns);
+    LuaReadHelper::readGlobal(L, "ACCUMULATED_META_POINTS", save.accumulatedMetaPoints);
+    LuaReadHelper::readGlobal(L, "ACTIVE_SHRINE_POINTS", save.activeShrinePoints);
+    LuaReadHelper::readGlobal(L, "EASY_MODE", save.easyMode);
+    LuaReadHelper::readGlobal(L, "HARD_MODE", save.hardMode);
+    LuaReadHelper::readGlobal(L, "MAP_NAME", save.mapName);
+    LuaReadHelper::readGlobal(L, "MAP_NAME2", save.mapName2);
+    LuaReadHelper::readGlobal(L, "NOTABLE_LUA_DATA", save.notableLuaData);
+    LuaReadHelper::readGlobalLuaBind(L, "LUA_DATA", save.luaBindData);
 
-    lua_getglobal(L, "GAME_VERSION");
-    data.gameVersion = lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "TIMESTAMP");
-    data.timestamp = lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "LOCATION");
-    data.location = lua_tostring(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "COMPLETED_RUNS");
-    data.complectedRuns = lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "ACCUMULATED_META_POINTS");
-    data.accumulatedMetaPoints = lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "ACTIVE_SHRINE_POINTS");
-    data.activeShrinePoints = lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "EASY_MODE");
-    data.easyMode = lua_toboolean(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "HARD_MODE");
-    data.hardMode = lua_toboolean(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "MAP_NAME");
-    data.mapName = lua_tostring(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "MAP_NAME2");
-    data.mapName2 = lua_tostring(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "NOTABLE_LUA_DATA");
-    if (!lua_istable(L, -1)) {
-        std::cerr << "NOTABLE_LUA_DATA is not a table." << std::endl;
-        lua_close(L);
-        return false;
-    }
-
-    int count = luaL_len(L, -1);
-    for (int i = 0; i < count; i++) {
-        lua_pushinteger(L, i + 1);
-        lua_gettable(L, -2);
-        if (lua_isstring(L, -1)) {
-            data.notableLuaData.push_back(lua_tostring(L, -1));
-        }
-        lua_pop(L, 1);
-    }
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "LUA_DATA");
-
-    if (!lua_istable(L, -1)) {
-        std::cerr << "LUA_DATA is not a table." << std::endl;
-        lua_close(L);
-        return false;
-    }
-
-    if (luabins_save(L, 1, 1) == LUABINS_ESUCCESS) {
-        size_t len = 0;
-        const char *bindData = lua_tolstring(L, -1, &len);
-        data.luaBindData = {bindData, len};
-        lua_pop(L, 1);
-    } else {
-        std::cerr << "Failed to save Lua state." << std::endl;
-    }
-    lua_pop(L, 1);
-
-    std::vector<uint8_t> binaryData{}; 
-    if (!data.write(binaryData)) {
+    std::vector<uint8_t> binaryData{};
+    if (!save.write(binaryData)) {
         std::cerr << "Failed to write save." << std::endl;
     }
 

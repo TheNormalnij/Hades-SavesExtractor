@@ -8,6 +8,7 @@
 #include "Hades/HadesSaveConverter.h"
 #include "LuaSerialize.h"
 #include "GameVersions.h"
+#include "LuaReadHelper.h"
 
 constexpr uint32_t SGG_HEADER_MAGIC = 0x31424753;
 
@@ -68,11 +69,10 @@ static bool import(const std::string_view inputFile, std::ofstream& outputFile) 
         return false;
     }
 
-    lua_getglobal(L, "GAME_VERSION");
-    eGameVersion gameVersion = static_cast<eGameVersion>(lua_tonumber(L, -1));
-    lua_pop(L, 1);
+    uint32_t gameVersion = 0;
+    LuaReadHelper::readGlobal(L, "GAME_VERSION", gameVersion);
 
-    switch (gameVersion) {
+    switch (static_cast<eGameVersion>(gameVersion)) {
     case eGameVersion::HADES:
         HadesSaveConverter::FromLua(L, outputFile);
         break;
