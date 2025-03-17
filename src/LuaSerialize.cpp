@@ -43,18 +43,26 @@ bool LuaSerialize::serialize_table(lua_State *L, std::ofstream &outFile, int ind
         nestOffset += "    ";
     }
 
+    int expectedArrayKey = 1;
+
     while (lua_next(L, index) != 0) {
         int value_pos = lua_gettop(L); /* We need absolute values */
         int key_pos = value_pos - 1;
 
         outFile << nestOffset;
 
-        if (lua_isnumber(L, key_pos)) {
-            lua_pushvalue(L, key_pos);
-            outFile << "[" << lua_tostring(L, -1) << "] = ";
-            lua_pop(L, 1);
+        if (expectedArrayKey && lua_isnumber(L, key_pos) && lua_tointeger(L, key_pos) == expectedArrayKey) {
+            expectedArrayKey++;
         } else {
-            outFile << "[\"" << toSafeString(L, key_pos) << "\"] = ";
+            expectedArrayKey = 0;
+
+            if (lua_isnumber(L, key_pos)) {
+                lua_pushvalue(L, key_pos);
+                outFile << "[" << lua_tostring(L, -1) << "] = ";
+                lua_pop(L, 1);
+            } else {
+                outFile << "[\"" << toSafeString(L, key_pos) << "\"] = ";
+            }
         }
 
         if (result) {
