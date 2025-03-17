@@ -4,6 +4,10 @@
 Extracts Hades save files to a human redable Lua format. Imports Lua files back to the save file format.
 The tool wasn't fully tested, so use it at your own risk. Always make a backup of your save files.
 
+#### Supported games
++ Hades
++ Hades II
+
 # Build
 
 ## Winows x64 with MSVC
