@@ -56,7 +56,11 @@ static bool writeGlobalLuaBind(std::ofstream &stream, const char *globalName, co
     return true;
 }
 
-template <typename T, typename = std::enable_if<std::is_convertible<T, int>::value>>
+static void writeGlobal(std::ofstream &stream, const char *globalName, const std::string& value) {
+    stream << globalName << " = \"" << value << "\"" << std::endl;
+}
+
+template <typename T, std::enable_if<std::is_convertible<T, int>::value>>
 static void writeGlobal(std::ofstream &stream, const char *globalName, T value) {
     stream << globalName << " = " << value << std::endl;
 }
