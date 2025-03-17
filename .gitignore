@@ -3,3 +3,5 @@ bin
 build
 out
 CMakeLists.txt.*
+Testing/
+tests/Hades2ParseTestOut.lua

@@ -38,7 +38,5 @@ int main() {
     
     lua_close(L);
 
-    std::filesystem::remove("./Hades2ParseTestOut.lua");
-
     return result ? 0 : 1;
 }

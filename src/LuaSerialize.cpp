@@ -5,6 +5,21 @@
 
 #include "LuaSerialize.h"
 
+static std::string toSafeString(lua_State *L, int key_pos) {
+    size_t len = 0;
+    const char *str = lua_tolstring(L, key_pos, &len);
+    std::string safeString{};
+    safeString.reserve(len);
+    for (size_t i = 0; i < len; i++) {
+        if (str[i] == '\\') {
+            safeString += "\\\\";
+        } else {
+            safeString += str[i];
+        }
+    }
+    return safeString;
+}
+
 bool LuaSerialize::serialize_table(lua_State *L, std::ofstream &outFile, int index, int nesting) {
     int result = true;
 
@@ -23,9 +38,11 @@ bool LuaSerialize::serialize_table(lua_State *L, std::ofstream &outFile, int ind
         outFile << nestOffset;
 
         if (lua_isnumber(L, key_pos)) {
-            outFile << "[" << lua_tonumber(L, key_pos) << "] = ";
+            lua_pushvalue(L, key_pos);
+            outFile << "[" << lua_tostring(L, -1) << "] = ";
+            lua_pop(L, 1);
         } else {
-            outFile << "[\"" << lua_tostring(L, key_pos) << "\"] = ";
+            outFile << "[\"" << toSafeString(L, key_pos) << "\"] = ";
         }
 
         if (result) {
@@ -57,7 +74,7 @@ int LuaSerialize::serialize_value(lua_State *L, std::ofstream &outFile, int inde
         break;
 
     case LUA_TSTRING:
-        outFile << "\"" << lua_tostring(L, index) << "\";";
+        outFile << "\"" << toSafeString(L, index) << "\";";
         break;
 
     case LUA_TTABLE:
