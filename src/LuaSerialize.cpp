@@ -20,6 +20,18 @@ static std::string toSafeString(lua_State *L, int key_pos) {
     return safeString;
 }
 
+static bool isTableEmpty(lua_State* L, int index) {
+    lua_checkstack(L, 2);
+    lua_pushnil(L);
+
+    if (lua_next(L, index)) {
+        lua_pop(L, 2);
+        return false;
+    } else {
+        return true;
+    }
+}
+
 bool LuaSerialize::serialize_table(lua_State *L, std::ofstream &outFile, int index, int nesting) {
     int result = true;
 
@@ -78,14 +90,21 @@ int LuaSerialize::serialize_value(lua_State *L, std::ofstream &outFile, int inde
         break;
 
     case LUA_TTABLE:
-        outFile << "{" << std::endl;
-        result = serialize_table(L, outFile, index, nesting + 1);
 
-        for (int i = 0; i < nesting; i++) {
-            outFile << "    ";
+        if (isTableEmpty(L, index)) {
+            outFile << "{}";
+        } else {
+            outFile << "{" << std::endl;
+            result = serialize_table(L, outFile, index, nesting + 1);
+
+            for (int i = 0; i < nesting; i++) {
+                outFile << "    ";
+            }
+
+            outFile << "};";
         }
 
-        outFile << "};";
+
         break;
 
     default:
