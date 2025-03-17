@@ -12,11 +12,11 @@
 
 namespace LuaFileWriteHelper {
 
-void writeGlobal(std::ofstream &stream, const char *globalName, bool value) {
+static void writeGlobal(std::ofstream &stream, const char *globalName, bool value) {
     stream << globalName << " = " << (value ? "true" : "false") << std::endl;
 }
 
-void writeGlobal(std::ofstream &stream, const char *globalName, const std::vector<std::string> &value) {
+static void writeGlobal(std::ofstream &stream, const char *globalName, const std::vector<std::string> &value) {
     stream << globalName << " = {" << std::endl;
     for (const auto &str : value) {
         stream << "    \"" << str << "\"," << std::endl;
@@ -24,7 +24,7 @@ void writeGlobal(std::ofstream &stream, const char *globalName, const std::vecto
     stream << "}" << std::endl;
 }
 
-bool writeGlobalLuaBind(std::ofstream &stream, const char *globalName, const std::string &value) {
+static bool writeGlobalLuaBind(std::ofstream &stream, const char *globalName, const std::string &value) {
     lua_State *L = luaL_newstate();
 
     if (!L) {
@@ -57,7 +57,7 @@ bool writeGlobalLuaBind(std::ofstream &stream, const char *globalName, const std
 }
 
 template <typename T, typename = std::enable_if<std::is_convertible<T, int>::value>>
-void writeGlobal(std::ofstream &stream, const char *globalName, T value) {
+static void writeGlobal(std::ofstream &stream, const char *globalName, T value) {
     stream << globalName << " = " << value << std::endl;
 }
 } // namespace LuaFileWriteHelper

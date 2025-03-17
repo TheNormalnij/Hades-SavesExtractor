@@ -8,6 +8,8 @@
 #include <fstream>
 #include <iostream>
 
+constexpr size_t SAVE_BUFFER_SIZE = 3129344 * 2;
+
 bool HadesSaveData::read(const std::vector<uint8_t> &buffer) {
     SGGBinaryParser parser{&buffer};
     SAFE_PARSER_READ(parser, magic)
@@ -18,6 +20,9 @@ bool HadesSaveData::read(const std::vector<uint8_t> &buffer) {
     SAFE_PARSER_READ(parser, complectedRuns)
     SAFE_PARSER_READ(parser, accumulatedMetaPoints)
     SAFE_PARSER_READ(parser, activeShrinePoints)
+    if (getGameVersion() == eGameVersion::HADES2) {
+        SAFE_PARSER_READ(parser, metaUpgradeLevel)
+    }
     SAFE_PARSER_READ(parser, easyMode)
     SAFE_PARSER_READ(parser, hardMode)
     SAFE_PARSER_READ(parser, notableLuaData)
@@ -50,6 +55,9 @@ bool HadesSaveData::write(std::vector<uint8_t> &binary) {
     SAFE_PARSER_WRITE(writter, complectedRuns)
     SAFE_PARSER_WRITE(writter, accumulatedMetaPoints)
     SAFE_PARSER_WRITE(writter, activeShrinePoints)
+    if (getGameVersion() == eGameVersion::HADES2) {
+        SAFE_PARSER_WRITE(writter, metaUpgradeLevel)
+    }
     SAFE_PARSER_WRITE(writter, easyMode)
     SAFE_PARSER_WRITE(writter, hardMode)
     SAFE_PARSER_WRITE(writter, notableLuaData)

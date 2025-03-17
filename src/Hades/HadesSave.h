@@ -10,13 +10,14 @@
 #include <lz4.h>
 #include <string>
 #include <vector>
-
-constexpr size_t SAVE_BUFFER_SIZE = 3129344 * 2;
+#include "../GameVersions.h"
 
 class HadesSaveData {
   public:
     bool read(const std::vector<uint8_t> &buffer);
     bool write(std::vector<uint8_t> &binary);
+
+    eGameVersion getGameVersion() const noexcept { return static_cast<eGameVersion>(gameVersion); };
 
     uint32_t magic;
     uint32_t checksum;
@@ -27,6 +28,7 @@ class HadesSaveData {
     uint32_t complectedRuns;
     uint32_t accumulatedMetaPoints;
     uint32_t activeShrinePoints;
+    uint32_t metaUpgradeLevel; // Hades 2
     uint8_t easyMode;
     uint8_t hardMode;
     std::vector<std::string> notableLuaData;

@@ -28,6 +28,9 @@ bool HadesSaveConverter::ToLua(std::vector<uint8_t> &buffer, std::ofstream &outF
     LuaFileWriteHelper::writeGlobal(outFile, "COMPLETED_RUNS", save.complectedRuns);
     LuaFileWriteHelper::writeGlobal(outFile, "ACCUMULATED_META_POINTS", save.accumulatedMetaPoints);
     LuaFileWriteHelper::writeGlobal(outFile, "ACTIVE_SHRINE_POINTS", save.activeShrinePoints);
+    if (save.getGameVersion() == eGameVersion::HADES2) {
+        LuaFileWriteHelper::writeGlobal(outFile, "META_UPGRADE_LEVEL", save.metaUpgradeLevel);
+    }
     LuaFileWriteHelper::writeGlobal(outFile, "EASY_MODE", static_cast<bool>(save.easyMode));
     LuaFileWriteHelper::writeGlobal(outFile, "HARD_MODE", static_cast<bool>(save.hardMode));
     LuaFileWriteHelper::writeGlobal(outFile, "MAP_NAME", save.mapName);
@@ -49,6 +52,9 @@ bool HadesSaveConverter::FromLua(lua_State *L, std::ofstream &outputFile) {
     LuaReadHelper::readGlobal(L, "COMPLETED_RUNS", save.complectedRuns);
     LuaReadHelper::readGlobal(L, "ACCUMULATED_META_POINTS", save.accumulatedMetaPoints);
     LuaReadHelper::readGlobal(L, "ACTIVE_SHRINE_POINTS", save.activeShrinePoints);
+    if (save.getGameVersion() == eGameVersion::HADES2) {
+        LuaReadHelper::readGlobal(L, "META_UPGRADE_LEVEL", save.metaUpgradeLevel);
+    }
     LuaReadHelper::readGlobal(L, "EASY_MODE", save.easyMode);
     LuaReadHelper::readGlobal(L, "HARD_MODE", save.hardMode);
     LuaReadHelper::readGlobal(L, "MAP_NAME", save.mapName);
