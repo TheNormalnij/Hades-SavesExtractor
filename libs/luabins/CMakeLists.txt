@@ -26,8 +26,11 @@ set(BINS_SOURCES
 	submodule/src/load.c
 )
 
+source_group(headers FILES ${BINS_HEADERS})
+source_group(sources FILES ${BINS_SOURCES})
+
 add_library(luabins STATIC ${BINS_HEADERS} ${BINS_SOURCES})
 
-target_include_directories(luabins PUBLIC ../lua-5.2.2/src)
+target_include_directories(luabins PUBLIC ./submodule/src)
 
 target_link_libraries(luabins PUBLIC liblua)

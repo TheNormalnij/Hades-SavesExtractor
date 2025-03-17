@@ -6,6 +6,10 @@
 #pragma once
 
 #include <saveload.h>
+#include <iostream>
+extern "C" {
+#include <luabins.h>
+}
 
 namespace LuaReadHelper {
 

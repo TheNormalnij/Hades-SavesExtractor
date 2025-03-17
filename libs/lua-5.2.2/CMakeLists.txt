@@ -70,4 +70,6 @@ source_group(libs FILES ${LIBS})
 add_library(liblua STATIC ${CORE_H} ${CORE_C} ${LIBS})
 set_target_properties(liblua PROPERTIES OUTPUT_NAME "lua52")
 
+target_include_directories(liblua PUBLIC ./src)
+
 add_compile_definitions(-DLUA_COMPAT_ALL)

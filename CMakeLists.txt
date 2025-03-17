@@ -30,13 +30,12 @@ add_subdirectory(libs/luabins)
 set(LZ4_BUILD_CLI OFF)
 add_subdirectory(libs/lz4/build/cmake)
 
-add_executable(HadesSavesExtractor 
+add_library(HadesSavesExtractorLib
     src/SGGBinaryParser.h
     src/Hades/HadesSave.h
     src/LuaSerialize.h
     src/SGGBinaryWritter.h
     src/LuaSerialize.cpp
-    src/main.cpp
     src/Hades/HadesSave.cpp
     src/adler32.h
     src/adler32.cpp
@@ -45,11 +44,29 @@ add_executable(HadesSavesExtractor
     src/GameVersions.h
     src/LuaFileWriteHelper.h
     src/LuaReadHelper.h
+    src/App.h
+    src/App.cpp
 )
 
-target_link_libraries(HadesSavesExtractor PRIVATE luabins liblua lz4)
+target_include_directories(HadesSavesExtractorLib PUBLIC ./src)
+target_link_libraries(HadesSavesExtractorLib PUBLIC liblua luabins lz4)
+
+add_executable(HadesSavesExtractor src/main.cpp)
+target_link_libraries(HadesSavesExtractor PRIVATE HadesSavesExtractorLib)
+
 
 target_include_directories(HadesSavesExtractor PUBLIC
     libs/lua-5.2.2/src
     libs/luabins/submodule/src
 )
+
+add_executable(Hades2ParseTest tests/Hades2ParseTest.cpp)
+target_link_libraries(Hades2ParseTest PRIVATE HadesSavesExtractorLib)
+
+enable_testing()
+
+add_test(
+  NAME Hades2ParseTest
+  COMMAND $<TARGET_FILE:Hades2ParseTest>
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests
+  )

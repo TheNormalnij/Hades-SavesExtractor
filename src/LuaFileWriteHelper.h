@@ -9,6 +9,9 @@
 #include <string>
 #include <vector>
 #include "LuaSerialize.h"
+extern "C" {
+#include <luabins.h>
+}
 
 namespace LuaFileWriteHelper {
 

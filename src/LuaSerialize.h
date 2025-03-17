@@ -8,9 +8,6 @@
 #include <fstream>
 
 #include <lua.hpp>
-extern "C" {
-#include <luabins.h>
-}
 
 namespace LuaSerialize {
 
