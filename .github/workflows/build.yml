@@ -30,7 +30,7 @@ jobs:
       with:
         name: Windows_${{ matrix.build_type }}_${{ matrix.arch }}
         path: |
-          ${{ github.workspace }}\bin\HadesSavesExtractor.exe
+          ${{ github.workspace }}\bin\${{ matrix.build_type }}\HadesSavesExtractor.exe
           ${{ github.workspace }}\scripts\extract.bat
           ${{ github.workspace }}\scripts\import.bat
   linux:
@@ -57,4 +57,4 @@ jobs:
       with:
         name: Linux_${{ matrix.build_type }}_${{ matrix.arch }}
         path: |
-          ${{ github.workspace }}\bin\HadesSavesExtractor
+          ./bin/HadesSavesExtractor

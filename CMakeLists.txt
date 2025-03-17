@@ -16,7 +16,6 @@ if ( MSVC )
         $<$<CONFIG:Release>:/INCREMENTAL:NO /OPT:REF /OPT:ICF>
         $<$<CONFIG:Debug>:/INCREMENTAL /DEBUG>
     )
-
 endif()
 
 add_subdirectory(libs/lua-5.2.2)
@@ -65,4 +64,4 @@ add_test(
   NAME Hades2ParseTest
   COMMAND $<TARGET_FILE:Hades2ParseTest>
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests
-  )
+)
