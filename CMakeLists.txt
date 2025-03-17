@@ -5,12 +5,7 @@ project(HadesSavesExtractor VERSION 1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
-
 if ( MSVC )
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
     set(COMPILE_OPTIONS
         $<$<CONFIG:Release>:/Zi /W3 /O2 /MP>
         $<$<CONFIG:Debug>:/Zi /W3 /Od /GF /Gm- /RTCc /RTC1 /MP>
@@ -53,6 +48,7 @@ target_link_libraries(HadesSavesExtractorLib PUBLIC liblua luabins lz4)
 
 add_executable(HadesSavesExtractor src/main.cpp)
 target_link_libraries(HadesSavesExtractor PRIVATE HadesSavesExtractorLib)
+set_target_properties(HadesSavesExtractor PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 
 target_include_directories(HadesSavesExtractor PUBLIC
