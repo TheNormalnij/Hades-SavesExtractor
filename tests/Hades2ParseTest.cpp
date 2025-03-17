@@ -20,6 +20,8 @@ int main() {
 
 	bool result = App::extract("./Hades2.sav", out);
 
+    out.close();
+
 	if (!result) {
 		return 1;
 	}
@@ -35,8 +37,20 @@ int main() {
         lua_close(L);
         return 1;
     }
-    
-    lua_close(L);
 
-    return result ? 0 : 1;
+    lua_close(L);
+    
+	std::ofstream outBinSafe{"./Hades2ParseTestOut.sav", std::fstream::binary};
+    result = App::import("./Hades2ParseTestOut.lua", outBinSafe);
+
+    outBinSafe.close();
+
+    if (!result) {
+        return 1;
+    }
+
+    std::filesystem::remove("./Hades2ParseTestOut.lua");
+    std::filesystem::remove("./Hades2ParseTestOut.sav");
+
+    return 0;
 }
