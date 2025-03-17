@@ -19,6 +19,11 @@ jobs:
       run: |
         cmake -A ${{ matrix.arch }} . -B build_msvc
         cmake --build build_msvc --config ${{ matrix.build_type }}
+
+    - name: Run tests
+      run: |
+        ctest --test-dir build_msvc -C ${{ matrix.build_type }}
+
       shell: bash
     - name: Store artifacts
       uses: actions/upload-artifact@v4
@@ -44,6 +49,9 @@ jobs:
         cmake . -B build ${{ matrix.arch == 'x86' && '-DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32' || '' }} -D CMAKE_BUILD_TYPE=${{ matrix.build_type }}
         cmake --build build --config ${{ matrix.build_type }}
       shell: bash
+    - name: Run tests
+      run:
+        ctest --test-dir build -C ${{ matrix.build_type }}
     - name: Store artifacts
       uses: actions/upload-artifact@v4
       with:
