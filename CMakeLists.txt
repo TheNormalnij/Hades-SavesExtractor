@@ -32,14 +32,17 @@ add_subdirectory(libs/lz4/build/cmake)
 
 add_executable(HadesSavesExtractor 
     src/SGGBinaryParser.h
-    src/HadesSave.h
+    src/Hades/HadesSave.h
     src/LuaSerialize.h
     src/SGGBinaryWritter.h
     src/LuaSerialize.cpp
     src/main.cpp
-    src/HadesSave.cpp
+    src/Hades/HadesSave.cpp
     src/adler32.h
     src/adler32.cpp
+    src/Hades/HadesSaveConverter.h
+    src/Hades/HadesSaveConverter.cpp
+    src/GameVersions.h
 )
 
 target_link_libraries(HadesSavesExtractor PRIVATE luabins liblua lz4)

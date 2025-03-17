@@ -8,19 +8,19 @@
 #include <string>
 #include <vector>
 #include <lz4.h>
-#include "SGGBinaryParser.h"
-#include "SGGBinaryWritter.h"
+#include "../SGGBinaryParser.h"
+#include "../SGGBinaryWritter.h"
 
 constexpr size_t SAVE_BUFFER_SIZE = 3129344 * 2;
 
 class HadesSaveData {
   public:
-    bool read(const std::string &filePath);
-    bool write(const std::string &filePath);
+    bool read(const std::vector<uint8_t> &buffer);
+    bool write(std::vector<uint8_t> &binary);
 
     uint32_t magic;       // SGB1
-    uint32_t checksum;    // adler32 ?
-    uint32_t gameVersion; // 0x10 in Hades
+    uint32_t checksum;
+    uint32_t gameVersion;
     uint64_t timestamp;
 
     std::string location;

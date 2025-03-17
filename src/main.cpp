@@ -5,200 +5,127 @@
 
 #include <iostream>
 
-#include "HadesSave.h"
+#include "Hades/HadesSaveConverter.h"
 #include "LuaSerialize.h"
+#include "GameVersions.h"
 
-static void extract(const std::string &inputFile, const std::string &outputFile) {
-    HadesSaveData save{};
+constexpr uint32_t SGG_HEADER_MAGIC = 0x31424753;
 
-    if (!save.read(inputFile)) {
-        std::cerr << "Failed to load save." << std::endl;
-        return;
+struct SaveHeader {
+    uint32_t magic{};
+    uint32_t checkSum{};
+    uint32_t gameVersion{};
+};
+
+static bool extract(const std::string_view inputFilePath, std::ofstream& outputFile) {
+    std::ifstream inFile(inputFilePath.data(), std::ifstream::ate | std::ifstream::binary);
+    if (!inFile) {
+        std::cerr << "Error opening input file." << std::endl;
+        return false;
     }
 
-    lua_State *L = luaL_newstate();
+    std::vector<uint8_t> buffer{};
+    buffer.resize(inFile.tellg());
+    inFile.seekg(0);
+    inFile.read(reinterpret_cast<char *>(buffer.data()), buffer.size());
+    inFile.close();
 
-    if (!L) {
-        std::cerr << "Failed to create Lua state." << std::endl;
-        return;
+    if (buffer.size() < sizeof(SaveHeader)) {
+        std::cerr << "Invalid header size." << std::endl;
+        return false;
     }
 
-    int count;
-    if (luabins_load(L, reinterpret_cast<const uint8_t *>(save.luaBindData.c_str()), save.luaBindData.size(), &count) !=
-        0) {
-        std::cerr << "Failed to deserialise." << std::endl;
-        lua_close(L);
-        return;
+    SaveHeader *header = reinterpret_cast<SaveHeader*>(buffer.data());
+
+    if (header->magic != SGG_HEADER_MAGIC) {
+        std::cerr << "Invalid header magic value." << std::endl;
+        return false;
+    }
+    
+    switch (static_cast<eGameVersion>(header->gameVersion)) {
+        case eGameVersion::HADES: {
+            HadesSaveConverter::ToLua(buffer, outputFile);
+            break;
+        }
+        default:
+            std::cerr << "Unknown game version." << std::endl;
+            return false;
     }
 
-    int top = lua_gettop(L);
-
-    if (!lua_istable(L, 1)) {
-        std::cerr << "Sealized value is not a table." << std::endl;
-        lua_close(L);
-        return;
-    }
-
-    std::ofstream outFile(outputFile);
-    if (!outFile) {
-        std::cerr << "Error opening file(s)." << std::endl;
-        return;
-    }
-
-    outFile << "MAGIC = " << save.magic << std::endl;
-    outFile << "CHECKSUM = " << save.checksum << std::endl;
-    outFile << "GAME_VERSION = " << save.gameVersion << std::endl;
-    outFile << "TIMESTAMP = " << save.timestamp << std::endl;
-    outFile << "LOCATION = \"" << save.location << "\"" << std::endl;
-    outFile << "COMPLETED_RUNS = " << save.complectedRuns << std::endl;
-    outFile << "ACCUMULATED_META_POINTS = " << save.accumulatedMetaPoints << std::endl;
-    outFile << "ACTIVE_SHRINE_POINTS = " << save.activeShrinePoints << std::endl;
-    outFile << "EASY_MODE = " << (save.easyMode ? "true" : "false") << std::endl;
-    outFile << "HARD_MODE = " << (save.hardMode ? "true" : "false") << std::endl;
-    outFile << "MAP_NAME = \"" << save.mapName << "\"" << std::endl;
-    outFile << "MAP_NAME2 = \"" << save.mapName2 << "\"" << std::endl;
-
-    outFile << "NOTABLE_LUA_DATA = {" << std::endl;
-    for (const auto &str : save.notableLuaData) {
-        outFile << "    \"" << str << "\"," << std::endl;
-    }
-    outFile << "}" << std::endl;
-
-    outFile << "LUA_DATA = {" << std::endl;
-
-    LuaSerialize::serialize_table(L, outFile, 1, 1);
-
-    outFile << "}" << std::endl;
-
-    lua_close(L);
+    return true;
 }
 
-static void import(const std::string& inputFile, const std::string& outputFile) {
+static bool import(const std::string_view inputFile, std::ofstream& outputFile) {
     lua_State *L = luaL_newstate();
     if (!L) {
         std::cerr << "Failed to create Lua state." << std::endl;
-        return;
+        return false;
     }
     
-    if (luaL_dofile(L, inputFile.c_str()) != 0) {
-        std::cerr << "Failed to load save." << std::endl;
+    if (luaL_dofile(L, inputFile.data()) != 0) {
+        std::cerr << "Failed to load Lua file." << std::endl;
         lua_close(L);
-        return;
+        return false;
     }
-    
-    HadesSaveData data{};
-    lua_getglobal(L, "MAGIC");
-    data.magic = lua_tonumber(L, -1);
-    lua_pop(L, 1);
 
     lua_getglobal(L, "GAME_VERSION");
-    data.gameVersion = lua_tonumber(L, -1);
+    eGameVersion gameVersion = static_cast<eGameVersion>(lua_tonumber(L, -1));
     lua_pop(L, 1);
 
-    lua_getglobal(L, "TIMESTAMP");
-    data.timestamp = lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "LOCATION");
-    data.location = lua_tostring(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "COMPLETED_RUNS");
-    data.complectedRuns = lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "ACCUMULATED_META_POINTS");
-    data.accumulatedMetaPoints = lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "ACTIVE_SHRINE_POINTS");
-    data.activeShrinePoints = lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "EASY_MODE");
-    data.easyMode = lua_toboolean(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "HARD_MODE");
-    data.hardMode = lua_toboolean(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "MAP_NAME");
-    data.mapName = lua_tostring(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "MAP_NAME2");
-    data.mapName2 = lua_tostring(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "NOTABLE_LUA_DATA");
-    if (!lua_istable(L, -1)) {
-        std::cerr << "NOTABLE_LUA_DATA is not a table." << std::endl;
-        lua_close(L);
-        return;
-    }
-
-    int count = luaL_len(L, -1);
-    for (int i = 0; i < count; i++) {
-        lua_pushinteger(L, i + 1);
-        lua_gettable(L, -2);
-        if (lua_isstring(L, -1)) {
-            data.notableLuaData.push_back(lua_tostring(L, -1));
-        }
-        lua_pop(L, 1);
-    }
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "LUA_DATA");
-
-    if (!lua_istable(L, -1)) {
-        std::cerr << "LUA_DATA is not a table." << std::endl;
-        lua_close(L);
-        return;
-    }
-
-    if (luabins_save(L, 1, 1) == 0) {
-        size_t len = 0;
-        const char *bindData = lua_tolstring(L, -1, &len);
-        data.luaBindData = {bindData, len};
-        lua_pop(L, 1);
-    } else {
-        std::cerr << "Failed to save Lua state." << std::endl;
-    }
-    lua_pop(L, 1);
-
-    if (!data.write(outputFile)) {
-        std::cerr << "Failed to write save." << std::endl;
+    switch (gameVersion) {
+    case eGameVersion::HADES:
+        HadesSaveConverter::FromLua(L, outputFile);
+        break;
+    default:
+        std::cerr << "Unknown game version." << std::endl;
+        return false;
     }
 
     lua_close(L);
+
+    return true;
 }
 
-int main(int argc, char* argv[]) {    
+static void showUsage(const char* cmdName) {
+    std::cerr << "Usage: " << cmdName << " --extract <filepath> --out <filepath>" << std::endl;
+    std::cerr << "       " << cmdName << " --import <filepath> --out <filepath>" << std::endl;
+}
+
+int main(int argc, char* argv[]) {
     if (argc != 5) {
-        std::cerr << "Usage: " << argv[0] << " --extract <filepath> --out <filepath>" << std::endl;
-        std::cerr << "       " << argv[0] << " --import <filepath> --out <filepath>" << std::endl;
+        showUsage(argv[0]);
         return 1;
     }
 
-    std::string command = argv[1];
-    std::string inputFile = argv[2];
-    std::string outFlag = argv[3];
-    std::string outputFile = argv[4];
+    std::string_view command = argv[1];
+    std::string_view inputFile = argv[2];
+    std::string_view outFlag = argv[3];
+    std::string_view outputFilePath = argv[4];
+
+    if (command != "--extract" && command != "--import") {
+        std::cerr << "Invalid command" << std::endl;
+        showUsage(argv[0]);
+        return 1;
+    }
 
     if (outFlag != "--out") {
-        std::cerr << "Invalid output flag. Use --out <filepath>" << std::endl;
+        std::cerr << "Invalid command" << std::endl;
+        showUsage(argv[0]);
         return 1;
     }
 
+    std::ofstream outputFile(outputFilePath.data(), std::ifstream::binary);
+    if (!outputFile) {
+        std::cerr << "Error opening output file." << std::endl;
+        return 1;
+    }
+
+    bool result = false;
     if (command == "--extract") {
-        extract(inputFile, outputFile);
+        result = extract(inputFile, outputFile);
     } else if (command == "--import") {
-        import(inputFile, outputFile);
-    } else {
-        std::cerr << "Invalid command. Use --extract or --import" << std::endl;
-        return 1;
+        result = import(inputFile, outputFile);
     }
 
-    return 0;
+    return result ? 0 : 1;
 }

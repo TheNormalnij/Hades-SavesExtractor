@@ -8,6 +8,12 @@
 #include <string>
 #include <vector>
 
+#define SAFE_PARSER_WRITE(value)                                                                                       \
+    if (!writter.write(value)) {                                                                                       \
+        std::cerr << "Cannot write " #value << std::endl;                                                              \
+        return false;                                                                                                  \
+    }
+
 class SGGBinaryWritter {
   public:
     SGGBinaryWritter(std::vector<uint8_t> *binary) : m_binary{binary} {};
