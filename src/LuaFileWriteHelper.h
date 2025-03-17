@@ -63,7 +63,7 @@ static void writeGlobal(std::ofstream &stream, const char *globalName, const std
     stream << globalName << " = \"" << value << "\"" << std::endl;
 }
 
-template <typename T, std::enable_if<std::is_convertible<T, int>::value>>
+template <typename T, std::enable_if_t<std::is_arithmetic_v<T>, int> = 0>
 static void writeGlobal(std::ofstream &stream, const char *globalName, T value) {
     stream << globalName << " = " << value << std::endl;
 }
