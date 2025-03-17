@@ -92,7 +92,7 @@ int LuaSerialize::serialize_value(lua_State *L, std::ofstream &outFile, int inde
     case LUA_TTABLE:
 
         if (isTableEmpty(L, index)) {
-            outFile << "{}";
+            outFile << "{};";
         } else {
             outFile << "{" << std::endl;
             result = serialize_table(L, outFile, index, nesting + 1);
